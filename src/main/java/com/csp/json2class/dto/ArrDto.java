@@ -1,4 +1,4 @@
-package com.csp.dto;
+package com.csp.json2class.dto;
 
 import com.csp.js.annotation.Mapping;
 

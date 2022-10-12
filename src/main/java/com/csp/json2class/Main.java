@@ -1,7 +1,7 @@
-package com.csp;
+package com.csp.json2class;
 
-import com.csp.dto.TestDto;
-import com.csp.factory.AnnotationBeanFactory;
+import com.csp.json2class.dto.TestDto;
+import com.csp.json2class.factory.AnnotationBeanFactory;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;

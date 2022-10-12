@@ -1,4 +1,4 @@
-package com.csp.engine;
+package com.csp.json2class.engine;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;

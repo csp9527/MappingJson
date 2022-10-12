@@ -1,8 +1,8 @@
-package com.csp.factory;
+package com.csp.json2class.factory;
 
-import com.csp.coter.Converter;
-import com.csp.engine.JsonParserEngine;
-import com.csp.engine.MappingDefinition;
+import com.csp.json2class.coter.Converter;
+import com.csp.json2class.engine.JsonParserEngine;
+import com.csp.json2class.engine.MappingDefinition;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import javax.script.ScriptException;

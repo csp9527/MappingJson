@@ -1,4 +1,4 @@
-package com.csp.coter;
+package com.csp.json2class.coter;
 
 /**
  * @description:

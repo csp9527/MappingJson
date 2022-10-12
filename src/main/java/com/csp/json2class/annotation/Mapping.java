@@ -1,4 +1,4 @@
-package com.csp.annotation;
+package com.csp.json2class.annotation;
 
 import java.lang.annotation.*;
 

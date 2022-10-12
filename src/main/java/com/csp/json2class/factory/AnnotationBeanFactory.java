@@ -1,8 +1,8 @@
-package com.csp.factory;
+package com.csp.json2class.factory;
 
-import com.csp.annotation.Mapping;
-import com.csp.coter.Converter;
-import com.csp.engine.MappingDefinition;
+import com.csp.json2class.annotation.Mapping;
+import com.csp.json2class.coter.Converter;
+import com.csp.json2class.engine.MappingDefinition;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
