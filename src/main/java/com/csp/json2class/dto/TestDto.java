@@ -1,6 +1,6 @@
 package com.csp.json2class.dto;
 
-import com.csp.js.annotation.Mapping;
+import com.csp.json2class.annotation.Mapping;
 
 import java.util.List;
 
