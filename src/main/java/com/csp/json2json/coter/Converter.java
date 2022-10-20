@@ -9,5 +9,5 @@ package com.csp.json2json.coter;
  */
 public interface Converter {
 
-    Object doConverter(Object originVal);
+    Object doConverter(Object originVal, String mapping);
 }

@@ -30,7 +30,7 @@ public class Main {
             "    \"total\": 1,\n" +
             "    \"data\": [\n" +
             "        {\n" +
-            "            \"associateShop\": {\n" +
+            "            \"$associateShop\": {\n" +
             "                \"tenant\": \"x\",\n" +
             "                \"id\": \"x\",\n" +
             "                \"orgType\": \"-\",\n" +
@@ -62,7 +62,7 @@ public class Main {
             "}";
 
     public static void main(String[] args) throws Exception {
-        test2();
+        test1();
     }
 
 
@@ -72,7 +72,7 @@ public class Main {
         engine.eval(func);
         if (engine instanceof Invocable) {
             Invocable invoke = (Invocable) engine;
-            Object val = invoke.invokeFunction("trans", json, "data[0].associateShop.contact.telephone");
+            Object val = invoke.invokeFunction("trans", json, "data[0].$associateShop.contact.telephone");
             System.out.println(val);
         }
     }

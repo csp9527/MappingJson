@@ -5,6 +5,7 @@ import org.dom4j.*;
 import org.dom4j.tree.BaseElement;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -18,45 +19,101 @@ public class Xml2JsonTest {
 
     private static String arrList = "rd";
 
-    private static final String ATTR_PREFIX = "-";
+    private static final String ATTR_PREFIX = "_";
+    private static final String DEFAULT_KEY_PREFIX = "$";
+    private static final String DEFAULT_KEY = "$key";
 
     public static void main(String[] args) throws DocumentException {
-        /*String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+        String xml1 = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+                "<root>\n" +
+                "</root>";
+
+        String xml2 = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+                "<root code=\"1\">\n" +
+                "</root>";
+
+        String xml3 = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+                "<root>\n" +
+                "123456\n" +
+                "</root>";
+
+        String xml4 = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+                "<root code=\"1\">\n" +
+                "123456\n" +
+                "</root>";
+
+        String xml5 = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
                 "<root code=\"1\">\n" +
                 "\t<rds>\n" +
                 "\t\t<rd id=\"123\">\n" +
-                "\t\t\t<name>haha</name>\n" +
                 "\t\t\t<age>20</age>\n" +
+                "\t\t\t<name>haha</name>\n" +
                 "\t\t</rd>\n" +
                 "\t\t<rd id=\"456\">\n" +
-                "\t\t\t<name>hehe</name>\n" +
                 "\t\t\t<age>25</age>\n" +
+                "\t\t\t<name>hehe</name>\n" +
                 "\t\t</rd>\n" +
                 "\t</rds>\n" +
                 "</root>";
 
-        System.out.println(toJson(xml));*/
+        String xml6 = "<root code=\"1\">\n" +
+                "\t<rds>\n" +
+                "\t\t<rd id=\"123\">\n" +
+                "\t\t\t20\n" +
+                "\t\t</rd>\n" +
+                "\t\t<rd id=\"456\">\n" +
+                "\t\t\t<age>25</age>\n" +
+                "\t\t\t<name>hehe</name>\n" +
+                "\t\t</rd>\n" +
+                "\t</rds>\n" +
+                "</root>";
+        String xml7 = "<root code=\"1\">\n" +
+                "\thaha\n" +
+                "\t<rds>\n" +
+                "\t\t<rd id=\"123\">\n" +
+                "\t\t\t<age>20</age>\n" +
+                "\t\t\t<name>haha</name>\n" +
+                "\t\t</rd>\n" +
+                "\t\t<rd id=\"456\">\n" +
+                "\t\t\t<age>25</age>\n" +
+                "\t\t\t<name>hehe</name>\n" +
+                "\t\t</rd>\n" +
+                "\t</rds>\n" +
+                "</root>";
 
-        String json = "{\n" +
-                "    \"root\": {\n" +
-                "        \"-code\": \"1\",\n" +
-                "        \"rds\": {\n" +
-                "            \"rd\": [\n" +
-                "                {\n" +
-                "                    \"-id\": \"123\",\n" +
-                "                    \"age\": \"20\",\n" +
-                "                    \"name\": \"haha\"\n" +
-                "                },\n" +
-                "                {\n" +
-                "                    \"-id\": \"456\",\n" +
-                "                    \"age\": \"25\",\n" +
-                "                    \"name\": \"hehe\"\n" +
-                "                }\n" +
-                "            ]\n" +
-                "        }\n" +
-                "    }\n" +
-                "}";
+        String xml8 = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+                "<root code=\"1\">\n" +
+                "\thaha\n" +
+                "\t<rds>\n" +
+                "\t\t<rd id=\"123\">\n" +
+                "\t\t\t20\n" +
+                "\t\t</rd>\n" +
+                "\t\t<rd id=\"456\">\n" +
+                "\t\t\t<age>25</age>\n" +
+                "\t\t\t<name>hehe</name>\n" +
+                "\t\t</rd>\n" +
+                "\t</rds>\n" +
+                "</root>";
 
+        String xml9 = "<root code=\"1\">\n" +
+                "\thaha\n" +
+                "\t<rds>\n" +
+                "\t\t<rd id=\"123\">\n" +
+                "\t\t\t20\n" +
+                "\t\t</rd>\n" +
+                "\t\t<rd id=\"456\">\n" +
+                "\t\t\t<age>25</age>\n" +
+                "\t\t\t<name>hehe</name>\n" +
+                "\t\t</rd>\n" +
+                "\t</rds>\n" +
+                "\thehe\n" +
+                "</root>";
+
+
+        //String json = toJson(xml9);
+        String json = "{1:2,2:4}";
+
+        System.out.println(json);
         System.out.println(toXml(json));
     }
 
@@ -73,11 +130,24 @@ public class Xml2JsonTest {
         List<Element> elementList = node.elements();
 
         String name = node.getName();
+        String nodeValue = node.getTextTrim();
         List<Attribute> attributeList = node.attributes();
 
-        if (elementList.isEmpty() && attributeList.isEmpty()) {
-            String nodeValue = node.getTextTrim();
-            jsonObject.addProperty(name, nodeValue);
+        if (elementList.isEmpty()) {
+            if (attributeList.isEmpty()) {
+                jsonObject.addProperty(name, nodeValue);
+            } else {
+                JsonObject js = new JsonObject();
+                for (Attribute attribute : attributeList) {
+                    String attributeName = attribute.getName();
+                    String attrrbuteValue = attribute.getValue();
+                    js.addProperty(ATTR_PREFIX + attributeName, attrrbuteValue);
+                }
+                if (!StringUtils.isBlank(nodeValue)) {
+                    js.addProperty(DEFAULT_KEY, nodeValue);
+                }
+                jsonObject.add(name, js);
+            }
         } else {
             JsonObject js = new JsonObject();
             // 判断json中是否存在同名的key
@@ -98,6 +168,9 @@ public class Xml2JsonTest {
                 jsonObject.add(name, jsonArray);
             } else {
                 jsonObject.add(name, js);
+            }
+            if (!StringUtils.isBlank(nodeValue)) {
+                js.addProperty(DEFAULT_KEY, nodeValue);
             }
             for (Attribute attribute : attributeList) {
                 String attributeName = attribute.getName();
@@ -144,10 +217,24 @@ public class Xml2JsonTest {
             }
         } else {
             if (name.startsWith(ATTR_PREFIX)) {
+                if (parentXmlElement == null) {
+                    parentXmlElement = new BaseElement(name);
+                }
                 parentXmlElement.addAttribute(name.substring(1), jsonElement.getAsString());
+            } else if (name.startsWith(DEFAULT_KEY_PREFIX)) {
+                if (parentXmlElement == null) {
+                    parentXmlElement = new BaseElement(name);
+                }
+                parentXmlElement.addText(jsonElement.getAsString());
             } else {
-                Element el = parentXmlElement.addElement(name);
-                el.addText(jsonElement.getAsString());
+                Element currentElement;
+                if (parentXmlElement == null) {
+                    currentElement = new BaseElement(name);
+                    parentXmlElement = currentElement;
+                } else {
+                    currentElement = parentXmlElement.addElement(name);
+                }
+                currentElement.addText(jsonElement.getAsString());
             }
         }
 

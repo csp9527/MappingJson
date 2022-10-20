@@ -4,7 +4,7 @@ import com.csp.json2class.dto.ArrDto;
 import com.csp.json2class.dto.SonDto;
 import com.csp.json2class.dto.TestDto;
 import com.csp.json2json.model.Node;
-import com.google.gson.Gson;
+import com.google.gson.*;
 
 import java.util.*;
 
@@ -17,63 +17,108 @@ import java.util.*;
  */
 public class Test {
 
-    private static Gson gson = new Gson();
+    private static Gson gson = new GsonBuilder().serializeNulls().create();
+
+    public static final String POINT = ".";
 
     private static Map<String, List<Node>> jsonDefinitionMap = new LinkedHashMap<>();
 
     public static void main(String[] args) {
-        ArrDto arrDto1 = new ArrDto();
-        arrDto1.setCode("0");
-        ArrDto arrDto2 = new ArrDto();
-        arrDto2.setCode("1");
-        List<ArrDto> arrDtoList = new ArrayList<>();
-        arrDtoList.add(arrDto1);
-        arrDtoList.add(arrDto2);
 
-        SonDto sonDto = new SonDto();
-        sonDto.setAge(18);
+        String json = "{\n" +
+                "    \"arrDtos\": [\n" +
+                "        {\n" +
+                "            \"code\": \"0\",\n" +
+                "            \"isTrue\": true,\n" +
+                "            \"hight\": 175\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"code\": \"1\",\n" +
+                "            \"isTrue\": false,\n" +
+                "            \"hight\": 176\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"name\": \"haha\",\n" +
+                "    \"sonDto\": {\n" +
+                "    \t\"hobby\": \"read\",\n" +
+                "        \"age\": 18,\n" +
+                "        \"canDrive\": true,\n" +
+                "        \"address\": [123,456],\n" +
+                "        \"sonDto\": {\n" +
+                "        \t\"name\": \"hehe\"\n" +
+                "        }\n" +
+                "    },\n" +
+                "    account:[\"123\", \"456\"]\n" +
+                "}";
 
-        TestDto testDto = new TestDto();
-        testDto.setName("haha");
-        testDto.setSonDto(sonDto);
-        testDto.setArrDtos(arrDtoList);
+        JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
 
-        String json = gson.toJson(testDto);
-
-        System.out.println(json);
-
-        Map map = gson.fromJson(json, Map.class);
-        System.out.println(map);
-        parse(map, "root");
+        parse(jsonObject, "", "root");
 
         System.out.println(gson.toJson(jsonDefinitionMap));
     }
 
-    public static void parse(Map root, String name) {
+    public static void parse(JsonObject jsonObject, String parentName, String currentName) {
         List<Node> nodes = new ArrayList<>();
-        jsonDefinitionMap.put(name, nodes);
+        currentName = getCurrentName(parentName, currentName);
+        jsonDefinitionMap.put(currentName, nodes);
 
-        Set<String> set = root.keySet();
+        Set<String> set = jsonObject.keySet();
         for (String key : set) {
 
-            Object val = root.get(key);
+            String actualType = getCurrentName(currentName, key);
+            JsonElement val = jsonObject.get(key);
             Node node = new Node();
             node.setName(key);
-            if (val instanceof Map) {
-                node.setType(key);
-                parse((Map) val, key);
-            } else if (val instanceof List) {
+            if (val instanceof JsonObject) {
+                node.setType("object");
+                node.setActualType(actualType);
+                parse((JsonObject) val, currentName, key);
+            } else if (val instanceof JsonArray) {
                 node.setType("array");
-                Object innerVal = ((List) val).get(0);
-                if (innerVal instanceof Map) {
-                    node.setActualType(key);
-                    parse((Map) innerVal, key);
+                JsonElement innerVal = ((JsonArray) val).get(0);
+                if (innerVal instanceof JsonObject) {
+                    node.setActualType(actualType);
+                    parse((JsonObject) innerVal, currentName, key);
+                } else if (innerVal instanceof JsonPrimitive) {
+                    JsonPrimitive jsonPrimitive = (JsonPrimitive) innerVal;
+                    if (jsonPrimitive.isString()) {
+                        node.setActualType("string");
+                        node.setValue(jsonPrimitive.getAsString());
+                    } else if (jsonPrimitive.isNumber()) {
+                        node.setActualType("double");
+                        node.setValue(jsonPrimitive.getAsDouble());
+                    } else if (jsonPrimitive.isBoolean()) {
+                        node.setActualType("boolean");
+                        node.setValue(jsonPrimitive.getAsBoolean());
+                    }
                 }
-            } else {
+            } else if (val instanceof JsonPrimitive) {
+                JsonPrimitive jsonPrimitive = (JsonPrimitive) val;
+                if (jsonPrimitive.isString()) {
+                    node.setType("string");
+                    node.setValue(jsonPrimitive.getAsString());
+                } else if (jsonPrimitive.isNumber()) {
+                    node.setType("double");
+                    node.setValue(jsonPrimitive.getAsDouble());
+                } else if (jsonPrimitive.isBoolean()) {
+                    node.setType("boolean");
+                    node.setValue(jsonPrimitive.getAsBoolean());
+                }
+
+            } else if (val instanceof JsonNull) {
                 node.setType("string");
+                node.setValue(null);
             }
             nodes.add(node);
         }
+    }
+
+    private static String getCurrentName(String parentName, String currentName) {
+        if (StringUtils.isBlank(parentName)) {
+            return currentName;
+        }
+        return parentName + POINT + currentName;
     }
 
 }

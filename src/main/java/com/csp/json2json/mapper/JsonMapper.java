@@ -73,9 +73,9 @@ public class JsonMapper {
                 }
                 parsedVal = list;
             } else {
-                parsedVal = doMapping(node.getType(), currentTargetLocation);
+                parsedVal = doMapping(node.getActualType(), currentTargetLocation);
             }
-            parsedVal = converter.doConverter(parsedVal);
+            parsedVal = converter.doConverter(parsedVal, null);
             jsonMap.put(name, parsedVal);
 
         }

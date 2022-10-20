@@ -9,7 +9,7 @@ package com.csp.json2json.coter;
  */
 public class DefaultConverter implements Converter {
     @Override
-    public Object doConverter(Object originVal) {
+    public Object doConverter(Object originVal, String mapping) {
         return originVal;
     }
 }
