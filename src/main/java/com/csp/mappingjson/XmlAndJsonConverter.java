@@ -30,6 +30,8 @@ public class XmlAndJsonConverter {
 
     private static final String ROOT_ELE_NAME = "root";
 
+    private static final String POINT = ".";
+
     /**
      * xml->json
      * @param xml 待转换xml数据
@@ -44,7 +46,7 @@ public class XmlAndJsonConverter {
         try {
             JsonObject jsonObject = new JsonObject();
             Document document = DocumentHelper.parseText(xml);
-            jsonObject = doXml2json(document.getRootElement(), jsonObject, eleNameOfArrTypeList);
+            jsonObject = doXml2json(document.getRootElement(), jsonObject, "", eleNameOfArrTypeList);
             return jsonObject.toString();
         } catch (DocumentException e) {
             throw new RuntimeException("xml解析异常", e);
@@ -57,12 +59,14 @@ public class XmlAndJsonConverter {
      * xml->json
      * @param currentElement xml当前待转换节点
      * @param jsonObject json当前待赋属性的对象
+     * @param parentPath 父元素路径
      * @param eleNameOfArrTypeList xml文件中需要转换为数组类型的节点名称集合
      * @return json赋属性后的对象
      */
-    private static JsonObject doXml2json(Element currentElement, JsonObject jsonObject, List<String> eleNameOfArrTypeList) {
+    private static JsonObject doXml2json(Element currentElement, JsonObject jsonObject, String parentPath, List<String> eleNameOfArrTypeList) {
 
         String name = currentElement.getName();
+        String currentPath = getCurrentPath(parentPath, name);
         String nodeValue = currentElement.getTextTrim();
         // 获取当前节点的子节点与属性
         List<Element> elementList = currentElement.elements();
@@ -96,7 +100,7 @@ public class XmlAndJsonConverter {
                 }
                 jsonArray.add(js);
                 jsonObject.add(name, jsonArray);
-            } else if (eleNameOfArrTypeList.contains(name)) { // 判断json当前属性是否按照数组类型创建
+            } else if (eleNameOfArrTypeList.contains(currentPath)) { // 判断json当前属性是否按照数组类型创建
                 JsonArray jsonArray = new JsonArray();
                 jsonArray.add(js);
                 jsonObject.add(name, jsonArray);
@@ -115,10 +119,25 @@ public class XmlAndJsonConverter {
             }
             // 遍历转换所有子节点
             for (Element element : elementList) {
-                doXml2json(element, js, eleNameOfArrTypeList);
+                doXml2json(element, js, currentPath, eleNameOfArrTypeList);
             }
         }
         return jsonObject;
+    }
+
+    /**
+     * 获取当前元素路径
+     * @param parentPath
+     * @param name
+     * @return
+     */
+    private static String getCurrentPath(String parentPath, String name) {
+        if (StringUtils.isBlank(parentPath)) {
+            return name;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(parentPath).append(POINT).append(name);
+        return sb.toString();
     }
 
     /**
